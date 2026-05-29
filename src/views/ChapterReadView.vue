@@ -33,7 +33,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import axios from 'axios'
+import apiClient from '../api'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
@@ -41,10 +41,7 @@ const router = useRouter()
 const data = ref(null)
 
 const fetchChapter = async (id) => {
-  const token = localStorage.getItem('token')
-  const res = await axios.get(`http://localhost:3000/chapters/${id}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  })
+  const res = await apiClient.get(`/chapters/${id}`)
   data.value = res.data
   window.scrollTo(0, 0) // 跳轉後自動回到頁面頂部
 }

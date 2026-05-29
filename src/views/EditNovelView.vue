@@ -45,7 +45,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import apiClient from '../api'
 
 const route = useRoute()
 const router = useRouter()
@@ -58,9 +58,7 @@ const previewUrl = ref('')
 // 1. 抓取舊資料
 onMounted(async () => {
   try {
-    const res = await axios.get(`http://localhost:3000/novels/${route.params.id}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
+    const res = await apiClient.get(`/novels/${route.params.id}`)
     novel.value = res.data
     tags.value = res.data.tags.map(t => t.name)
     previewUrl.value = res.data.cover_url
@@ -94,11 +92,8 @@ const updateNovel = async () => {
   if (coverFile.value) formData.append('novel[cover]', coverFile.value)
 
   try {
-    await axios.patch(`http://localhost:3000/novels/${route.params.id}`, formData, {
-      headers: { 
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'multipart/form-data'
-      }
+    await apiClient.patch(`/novels/${route.params.id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
     })
     alert("修改成功！")
     router.push(`/novels/${route.params.id}`)

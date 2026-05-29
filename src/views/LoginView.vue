@@ -14,7 +14,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
+import apiClient from '../api'
 import { useRouter } from 'vue-router'
 
 const email = ref('')
@@ -24,7 +24,7 @@ const emit = defineEmits(['login-success'])
 
 const login = async () => {
   try {
-    const res = await axios.post('http://localhost:3000/login', { 
+    const res = await apiClient.post('/login', { 
       email: email.value, 
       password: password.value 
     })

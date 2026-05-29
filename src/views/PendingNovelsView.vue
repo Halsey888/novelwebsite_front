@@ -25,15 +25,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import apiClient from '../api'
 
 const novels = ref([])
 
 const fetchPending = async () => {
   try {
-    const res = await axios.get('http://localhost:3000/novels/pending', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
+    const res = await apiClient.get('/novels/pending')
     novels.value = res.data
   } catch (e) {
     alert("讀取待審核列表失敗")
@@ -43,9 +41,7 @@ const fetchPending = async () => {
 const handleApprove = async (id) => {
   if (!confirm("確定要上架這部作品嗎？")) return
   try {
-    await axios.post(`http://localhost:3000/novels/${id}/approve`, {}, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
+    await apiClient.post(`/novels/${id}/approve`)
     alert("審核通過！")
     fetchPending() // 重新刷新
   } catch (e) {
@@ -56,9 +52,7 @@ const handleApprove = async (id) => {
 const handleDelete = async (id) => {
   if (!confirm("確定要刪除這部作品嗎？")) return
   try {
-    await axios.delete(`http://localhost:3000/novels/${id}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
+    await apiClient.delete(`/novels/${id}`)
     fetchPending()
   } catch (e) {
     alert("刪除失敗")

@@ -46,7 +46,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
+import apiClient from '../api'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -100,11 +100,8 @@ const createNovel = async () => {
     }
 
     // 4. 發送請求，Header 加上 multipart/form-data
-    await axios.post('http://localhost:3000/novels', formData, {
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data' 
-      }
+    await apiClient.post('/novels', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
     })
     
     alert('作品已送出！請等待管理員審核通過後即可上架。')

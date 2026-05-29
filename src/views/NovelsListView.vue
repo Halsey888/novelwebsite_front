@@ -62,7 +62,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import apiClient from '../api'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -72,14 +72,11 @@ const currentUserId = ref(null)
 const userRole = ref('')
 
 // 抓取小說列表
+// ✅ 新（攔截器已自動處理 token）
 const fetchNovels = async () => {
   try {
     isLoading.value = true
-    const token = localStorage.getItem('token')
-    const headers = token ? { Authorization: `Bearer ${token}` } : {}
-    
-    // 向後端請求，後端會根據身分過濾 pending 或顯示全部
-    const res = await axios.get('http://localhost:3000/novels', { headers })
+    const res = await apiClient.get('/novels')
     novels.value = res.data
   } catch (error) {
     console.error("讀取失敗:", error)
@@ -92,9 +89,7 @@ const fetchNovels = async () => {
 const approveNovel = async (id) => {
   if (!confirm("確定要通過這本小說的審核嗎？")) return
   try {
-    await axios.post(`http://localhost:3000/novels/${id}/approve`, {}, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
+    await apiClient.post(`/novels/${id}/approve`)
     alert("審核成功！作品已上架")
     fetchNovels() // 刷新列表
   } catch (e) {
@@ -106,10 +101,7 @@ const approveNovel = async (id) => {
 const handleDelete = async (id) => {
   if (!confirm("確定要刪除這部作品嗎？這個動作無法復原！")) return
   try {
-    const token = localStorage.getItem('token')
-    await axios.delete(`http://localhost:3000/novels/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    await apiClient.delete(`/novels/${id}`)
     novels.value = novels.value.filter(n => n.id !== id)
     alert("已刪除作品")
   } catch (error) {

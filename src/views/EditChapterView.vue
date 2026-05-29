@@ -29,7 +29,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import apiClient from '../api'
 
 const route = useRoute()
 const router = useRouter()
@@ -39,7 +39,7 @@ const isSaving = ref(false)
 // 取得原始資料
 const fetchChapter = async () => {
   try {
-    const res = await axios.get(`http://localhost:3000/chapters/${route.params.id}`)
+    const res = await apiClient.get(`/chapters/${route.params.id}`)
     chapter.value = res.data.chapter
   } catch (e) {
     alert("讀取章節失敗")
@@ -49,12 +49,9 @@ const fetchChapter = async () => {
 const handleUpdate = async () => {
   isSaving.value = true
   try {
-    const token = localStorage.getItem('token')
-    // 注意：這裡的路由必須對應 /novels/:novel_id/chapters/:id
-    await axios.put(
-      `http://localhost:3000/novels/${chapter.value.novel_id}/chapters/${chapter.value.id}`,
-      { chapter: chapter.value },
-      { headers: { Authorization: `Bearer ${token}` } }
+    await apiClient.put(
+      `/novels/${chapter.value.novel_id}/chapters/${chapter.value.id}`,
+      { chapter: chapter.value }
     )
     alert("更新成功！")
     router.back() // 回到上一頁（通常是小說詳情頁）

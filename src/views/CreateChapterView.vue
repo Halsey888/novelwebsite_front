@@ -27,7 +27,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
+import apiClient from '../api'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
@@ -47,11 +47,8 @@ const submitChapter = async () => {
   }
 
   try {
-    const token = localStorage.getItem('token')
-    await axios.post('http://localhost:3000/chapters', {
+    await apiClient.post('/chapters', {
       chapter: newChapter.value
-    }, {
-      headers: { Authorization: `Bearer ${token}` }
     })
 
     alert('章節發布成功！')

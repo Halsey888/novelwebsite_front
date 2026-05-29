@@ -26,7 +26,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
+import apiClient from '../api'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -51,11 +51,8 @@ const uploadFiles = async () => {
   })
 
   try {
-    await axios.post(`http://localhost:3000/novels/${route.params.id}/chapters/bulk_upload`, formData, {
-      headers: { 
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'multipart/form-data'
-      }
+    await apiClient.post(`/novels/${route.params.id}/chapters/bulk_upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
     })
     alert('批量上傳完成！')
     files.value = []

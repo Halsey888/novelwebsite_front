@@ -107,7 +107,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import axios from 'axios'
+import apiClient from '../api'
 // 如果你要用 route，就需要 import，但這裡我們直接用 props.id 即可
 import { useRoute } from 'vue-router'
 
@@ -124,10 +124,7 @@ const selectedIds = ref([]) // 用來存儲被勾選的 ID
 // 將讀取邏輯獨立出來，這樣上傳完才能重新呼叫
 const fetchNovelDetail = async () => {
   try {
-    const token = localStorage.getItem('token')
-    const res = await axios.get(`http://localhost:3000/novels/${props.id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    const res = await apiClient.get(`/novels/${props.id}`)
     novel.value = res.data
     previewUrl.value = res.data.cover_url
   } catch (e) {
@@ -139,10 +136,8 @@ const handleBulkDelete = async () => {
   if (!confirm(`確定要刪除這 ${selectedIds.value.length} 個章節嗎？`)) return
   
   try {
-    const token = localStorage.getItem('token')
-    await axios.delete(`http://localhost:3000/novels/${props.id}/chapters/bulk_delete`, {
-      data: { ids: selectedIds.value }, // 注意：DELETE 請求帶 body 要放在 data 欄位
-      headers: { Authorization: `Bearer ${token}` }
+    await apiClient.delete(`/novels/${props.id}/chapters/bulk_delete`, {
+      data: { ids: selectedIds.value }
     })
     
     alert("批量刪除成功！")
@@ -170,11 +165,7 @@ const handleDelete = async (chapterId) => {
   if (!confirm("確定要刪除這個章節嗎？此動作無法復原！")) return
   
   try {
-    const token = localStorage.getItem('token')
-    // 2. 發送刪除請求
-    await axios.delete(`http://localhost:3000/novels/${props.id}/chapters/${chapterId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    await apiClient.delete(`/novels/${props.id}/chapters/${chapterId}`)
     
     // 3. 關鍵修正：直接重新抓取資料，最穩保險
     // 或者手動過濾：novel.value.chapters = novel.value.chapters.filter(c => c.id !== chapterId)
@@ -211,16 +202,18 @@ const confirmUpload = async () => {
     formData.append('files[]', file)
   })
 
+  // ✅ 直接從 localStorage 拿 token
+  const token = localStorage.getItem('token')
+  console.log('目前 token:', token)  // ← 加入這行除錯
   try {
     // 修正：將 route.params.id 改為 props.id
-    await axios.post(
-      `http://localhost:3000/novels/${props.id}/chapters/bulk_upload`, 
+    // ✅ 新（只保留 Content-Type）
+    await apiClient.post(
+      `/novels/${props.id}/chapters/bulk_upload`, 
       formData, 
       {
-        headers: { 
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'multipart/form-data'
-        }
+        headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${token}` } // ← 手動帶入
+        
       }
     )
     alert('批量上傳成功！')
